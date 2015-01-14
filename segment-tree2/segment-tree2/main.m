@@ -20,10 +20,9 @@ int tree[TOTALNUM*2-1]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,14,9,19,1
 int treeattr[2][TOTALNUM*2-1];
 
 
-// start番目の番号からgoal番目までの累積和と計算回数を表示する
 /* Queue  First-In First-Out方式 */
 const int SIZE = 500; // キューとして使う配列のサイズ
-// [0][i]累積和のキュー[1][i]番号の計算キュー
+// [0][i]累積和のキュー[1][i]番号の飛び方の計算キュー
 int queue[2][SIZE];
 NSString *path[SIZE]; // 経路出力用に文字列の配列を用意
 
@@ -42,16 +41,17 @@ void sum_sequence( int start, int goal ){
                 // 探索結果出力
                 NSLog(@"%d",queue[0][front]);
                 NSLog(@"%@",path[front]);
-                //NSLog(@"%@",path[rear]);
                 return; // キューのサイズが足りないので、答えが出たら探索途中でwhileループ終了
-            }else if(queue[1][front] + treeattr[0][i]<=goal){
-                if(queue[1][front]==treeattr[1][i]){
-                    queue[0][rear] = queue[0][front] + tree[i]; // #3.キュー取り込み
+            }else if(queue[1][front] + treeattr[0][i] <= goal){
+                // 開始番号と一致するか
+                if(treeattr[1][i] == queue[1][front]){
+                    // #3.キュー取り込み
+                    queue[0][rear] = queue[0][front] + tree[i];
                     queue[1][rear] = queue[1][front] + treeattr[0][i];
                     path[rear]=[NSString stringWithFormat:@"%@,%d",path[front],tree[i]];
                     rear++; // #4.キューに取り込んだら、次に取り込む位置に移動
                 }
-            } // キューサイズ節約のため、startがgoalより大きくなったらキューに取り込まない
+            } // キューサイズ節約のため、queue[1][rear]がgoalより大きくなりそうならキューに取り込まない
         }
         front++; // #5.キューの先頭の枝１本を探索済み・削除扱いして、次の枝の取り込みへ
     }
@@ -77,6 +77,7 @@ void tree_update(int m, int n){
 
 // セグメント木作成
 void init_tree(){
+    // セグメント木生成
     for (int i=TOTALNUM-2;i>=0;i--){
         if (tree[i]==-1){
             tree[i]=tree[i*2+1]+tree[i*2+2];
@@ -104,7 +105,7 @@ void init_tree(){
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        // 入力
+        // 入力受付
         scanf("%d",&isUPDATE);
         // isUPDATEをフラグに更新情報を読み込み
         if(isUPDATE==1){
@@ -115,6 +116,7 @@ int main(int argc, const char * argv[]) {
         // 処理開始
         // セグメント木の初期化
         init_tree();
+        // 構成変更があれば修正
         if(isUPDATE==1){
             tree_update(p,q);
         }
